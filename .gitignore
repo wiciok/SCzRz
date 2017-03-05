@@ -27,3 +27,16 @@
 *.exe
 *.out
 *.app
+
+/192.168.1.10
+/.metadata
+*/x86
+*/.idea
+*.*project
+*/.qnx_internal.*
+*/common.mk
+*/Makefile
+
+
+192.168.1.10
+.metadata
