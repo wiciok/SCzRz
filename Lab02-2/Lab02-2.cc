@@ -25,11 +25,12 @@ void *threadFunction(void* argv)
 	{
 		if (checkIfPrimary(i)==true)
 		{
-			cout<< "Thread PID: " <<pthread_self()<< " Prime number: " << i << endl;
+			cout<< "Thread PID: " <<pthread_self()<< " Prime: " << i << endl;
 			counter++;
 		}
 	}
-	return (void *)counter;
+	return 0;
+	//return (void *)counter;
 }
 
 int main(int argc, char *argv[])
@@ -49,51 +50,40 @@ int main(int argc, char *argv[])
 			<<"Upper bound: "<<zg<<endl
 			<<"Threads number: "<<threadsNumber<<endl;
 
-	/*
-	//granice powiekszamy o 1 tak aby uzytkownik podawal przedzial obustronnie domkniety
-	upperBound+=1;
-*/
 
-	//threadsVector.reserve(threadsNumber);
+	//granice powiekszamy o 1 tak aby uzytkownik podawal przedzial obustronnie domkniety
+	//upperBound+=1;
 
 	int threadInterval=(zg-zd)/threadsNumber;
 
-	//ThreadData threadStruct;
-
-	// DODAC zapiswanie do wektora
+	ThreadData threadStruct;
 	for(int i=0;i<threadsNumber-1;i++)
 	{
-		ThreadData threadStruct;
-
 		threadStruct.begin=zd+i*threadInterval;
 		threadStruct.end=threadStruct.begin+threadInterval;
 		pthread_create(&threadStruct.TID, NULL, threadFunction, NULL);
 
 		threadsVector.push_back(threadStruct);
-
-		/*threadsVector[i].begin=zd+i*threadInterval;
-		threadsVector[i].end=threadsVector[i].begin+threadInterval;
-		pthread_create(&threadsVector[i].TID, NULL, threadFunction, NULL);*/
 	}
 
 	//last interval
-	/*//posprawdzac indeksy
+	//posprawdzac indeksy
 	threadStruct.begin=zd+(threadsNumber-1)*threadInterval;
 	threadStruct.end=zg;
-	threadStruct.num=threadsNumber;
-	pthread_create(threadsVector[threadsNumber-1].TID, NULL, threadFunction, NULL);*/
+	pthread_create(&threadsVector[threadsNumber-1].TID, NULL, threadFunction, NULL);
+	threadsVector.push_back(threadStruct);
 
-	//cout<<"vector capacity: "<< threadsVector.size()<<endl;
+	cout<<"vector capacity: "<< threadsVector.size()<<endl;
 
-	//tutaj pobieranie wartroci!!!
 	for(auto element : threadsVector)
 	{
 		void* primesNumber;
 		pthread_join(element.TID, &primesNumber);
-		cout<<"Thread "<<element.TID<<" Primes number: "<<*(int*)primesNumber;
+		cout<<"Thread "<<element.TID;
+		cout<<"Primes number: "<<*(int*)primesNumber;
 	}
-
-	sleep(10);
+	cout<<"test";
+	sleep(1);
 	return EXIT_SUCCESS;
 }
 
