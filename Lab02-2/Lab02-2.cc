@@ -11,17 +11,17 @@ bool checkIfPrimary(int number);
 
 struct ThreadData
 {
-   int begin;
-   int end;
+   int zd;
+   int zg;
    pthread_t TID;
 };
 
-std::vector<ThreadData> threadsVector;
+ThreadData* threads;
 
 void *threadFunction(void* argv)
 {
 	int counter=0;
-	for(int i=threadsVector[(int)pthread_self() - 2].begin; i<threadsVector[(int)pthread_self() - 2].end; i++)
+	for(int i=threads[pthread_self() - 2].zd; i<threads[pthread_self() - 2].zg; i++)
 	{
 		if (checkIfPrimary(i)==true)
 		{
@@ -29,8 +29,7 @@ void *threadFunction(void* argv)
 			counter++;
 		}
 	}
-	return 0;
-	//return (void *)counter;
+	return (void *)counter;
 }
 
 int main(int argc, char *argv[])
@@ -50,37 +49,37 @@ int main(int argc, char *argv[])
 			<<"Upper bound: "<<zg<<endl
 			<<"Threads number: "<<threadsNumber<<endl;
 
-
-	//granice powiekszamy o 1 tak aby uzytkownik podawal przedzial obustronnie domkniety
-	//upperBound+=1;
-
 	int threadInterval=(zg-zd)/threadsNumber;
 
-	ThreadData threadStruct;
-	for(int i=0;i<threadsNumber-1;i++)
-	{
-		threadStruct.begin=zd+i*threadInterval;
-		threadStruct.end=threadStruct.begin+threadInterval;
-		pthread_create(&threadStruct.TID, NULL, threadFunction, NULL);
+	int lowerBoundOfInterval = zd;
+	int upperBoundOfInterval = zd+threadInterval;
 
-		threadsVector.push_back(threadStruct);
+	threads = new ThreadData[threadsNumber];
+
+	//compute bounds and create threads
+	for(int i=0; i<threadsNumber-1; i++)
+	{
+		threads[i].zd = lowerBoundOfInterval;
+		threads[i].zg = upperBoundOfInterval;
+		lowerBoundOfInterval += threadInterval;
+
+		pthread_create(&(threads[i].TID), NULL, threadFunction, NULL);
+		lowerBoundOfInterval = upperBoundOfInterval;
+		upperBoundOfInterval += threadInterval;
 	}
 
 	//last interval
-	//posprawdzac indeksy
-	threadStruct.begin=zd+(threadsNumber-1)*threadInterval;
-	threadStruct.end=zg;
-	pthread_create(&threadsVector[threadsNumber-1].TID, NULL, threadFunction, NULL);
-	threadsVector.push_back(threadStruct);
+	threads[threadsNumber-1].zd = lowerBoundOfInterval;
+	threads[threadsNumber-1].zg = zg;
+	pthread_create(&(threads[threadsNumber-1].TID), NULL, threadFunction, NULL);
 
-	cout<<"vector capacity: "<< threadsVector.size()<<endl;
 
-	for(auto element : threadsVector)
+	for(int i=0; i<threadsNumber; i++)
 	{
 		void* primesNumber;
-		pthread_join(element.TID, &primesNumber);
-		cout<<"Thread "<<element.TID;
-		cout<<"Primes number: "<<*(int*)primesNumber;
+		pthread_join(threads[i].TID, &primesNumber);
+		cout<<"Thread "<<threads[i].TID;
+		cout<<" Primes number: "<<(int)primesNumber<<endl;
 	}
 	cout<<"test";
 	sleep(1);
