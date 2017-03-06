@@ -50,6 +50,8 @@ void *threadFunction(void* argv)
 			counter++;
 		}
 	}
+	cout<<"Thread TID: "<<pthread_self()<<" primes counter: "<<counter<<endl;
+	//wypisanie zakonczenia, usuniecie z wektora
 	return (void *)counter;
 }
 
@@ -117,16 +119,19 @@ int main(int argc, char *argv[])
 	IntervalsVector.push_back(tmpInterval);
 
 
+	ThreadData tmpThread;
 	//tworzenie watkow
 	for(int i=0; i<threadsNumber; i++)
 	{
-
-		pthread_create(&(threads[i].TID), NULL, threadFunction, NULL);
+		pthread_create(&tmpThread.TID, NULL, threadFunction, NULL);
+		ThreadsVector.push_back(tmpThread);
 	}
+
 
 
 	while(true) //liczba przedzialow w wektorze >0
 	{
+
 
 	}
 
