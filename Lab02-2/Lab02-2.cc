@@ -21,6 +21,7 @@ ThreadData* threads;
 void *threadFunction(void* argv)
 {
 	int counter=0;
+	//dodac 1 do zg(?)
 	for(int i=threads[pthread_self() - 2].zd; i<threads[pthread_self() - 2].zg; i++)
 	{
 		if (checkIfPrimary(i)==true)
@@ -44,32 +45,32 @@ int main(int argc, char *argv[])
 	int zg=atoi(argv[2]);
 	int threadsNumber = atoi(argv[3]);
 
-	cout<<"Input parameters:"
-			<<endl<<"Lower bound: "<<zd<<endl
+	cout<<"Input parameters:"<<endl
+			<<"Lower bound: "<<zd<<endl
 			<<"Upper bound: "<<zg<<endl
 			<<"Threads number: "<<threadsNumber<<endl;
 
 	int threadInterval=(zg-zd)/threadsNumber;
 
-	int lowerBoundOfInterval = zd;
-	int upperBoundOfInterval = zd+threadInterval;
+	int zdOfInterval = zd;
+	int zgOfInterval = zd+threadInterval;
 
 	threads = new ThreadData[threadsNumber];
 
 	//compute bounds and create threads
 	for(int i=0; i<threadsNumber-1; i++)
 	{
-		threads[i].zd = lowerBoundOfInterval;
-		threads[i].zg = upperBoundOfInterval;
-		lowerBoundOfInterval += threadInterval;
+		threads[i].zd = zdOfInterval;
+		threads[i].zg = zgOfInterval;
+		zdOfInterval += threadInterval;
 
 		pthread_create(&(threads[i].TID), NULL, threadFunction, NULL);
-		lowerBoundOfInterval = upperBoundOfInterval;
-		upperBoundOfInterval += threadInterval;
+		zdOfInterval = zgOfInterval;
+		zgOfInterval += threadInterval;
 	}
 
 	//last interval
-	threads[threadsNumber-1].zd = lowerBoundOfInterval;
+	threads[threadsNumber-1].zd = zdOfInterval;
 	threads[threadsNumber-1].zg = zg;
 	pthread_create(&(threads[threadsNumber-1].TID), NULL, threadFunction, NULL);
 
