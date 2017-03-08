@@ -7,8 +7,6 @@
 #include <unistd.h>
 using namespace std;
 
-bool checkIfPrimary(int number);
-
 struct ThreadData
 {
    int zd;
@@ -25,8 +23,11 @@ struct Interval
 };
 
 
+bool checkIfPrimary(int number);
+Interval getInterval();
 
-//ThreadData* threads;
+
+
 std::vector<ThreadData> ThreadsVector;
 std::vector<Interval> IntervalsVector;
 
@@ -34,25 +35,29 @@ pthread_mutex_t intervalsMutex;
 
 void *threadFunction(void* argv)
 {
-	Interval interval=getInterval();
+	Interval interval;
 
-	if(interval.zd==-1 && interval.zg==-1)
+	while(IntervalsVector.size()>0)
 	{
-		return nullptr;
-	}
+		interval=getInterval();
 
-	int counter=0;
-	for(int i=interval.zd; i<interval.zg+1; i++)
-	{
-		if (checkIfPrimary(i)==true)
+		if(interval.zd==-1 && interval.zg==-1)
 		{
-			cout<< "Thread PID: " <<pthread_self()<< " Prime: " << i << endl;
-			counter++;
+			return nullptr;
 		}
+
+		int counter=0;
+		for(int i=interval.zd; i<interval.zg+1; i++)
+		{
+			if (checkIfPrimary(i)==true)
+			{
+				cout<< "Thread PID: " <<pthread_self()<< " Prime: " << i << endl;
+				counter++;
+			}
+		}
+		cout<<"Thread TID: "<<pthread_self()<<" primes counter: "<<counter<<endl;
 	}
-	cout<<"Thread TID: "<<pthread_self()<<" primes counter: "<<counter<<endl;
-	//wypisanie zakonczenia, usuniecie z wektora
-	return (void *)counter;
+	return nullptr;
 }
 
 
@@ -63,7 +68,8 @@ Interval getInterval()
 	if(IntervalsVector.size()>0)
 	{
 		pthread_mutex_lock(&intervalsMutex);
-		interval=IntervalsVector.pop_back();
+		interval=IntervalsVector.back();
+		IntervalsVector.pop_back();
 		pthread_mutex_unlock(&intervalsMutex);
 	}
 	else
@@ -128,23 +134,15 @@ int main(int argc, char *argv[])
 	}
 
 
-
-	while(true) //liczba przedzialow w wektorze >0
-	{
-
-
-	}
-
-
-	//joinowanie pozostaych wtków i drukowanie wartosci
-
 	for(int i=0; i<threadsNumber; i++)
 	{
-		void* primesNumber;
-		pthread_join(threads[i].TID, &primesNumber);
-		cout<<"Thread "<<threads[i].TID;
-		cout<<" Primes number: "<<(int)primesNumber<<endl;
+		//void* primesNumber;
+		//pthread_join(threads[i].TID, &primesNumber);
+		pthread_join(ThreadsVector[i].TID, nullptr);
+		//cout<<"Thread "<<ThreadsVector[i].TID;
+		//cout<<" Primes number: "<<(int)primesNumber<<endl;
 	}
+	//usuwanie watkow z wektora
 	cout<<"test";
 	sleep(1);
 	return EXIT_SUCCESS;
