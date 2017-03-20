@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <vector>
+#include <queue>
 #include <random>
 using namespace std;
 
@@ -11,6 +12,8 @@ const int PLACES=10;
 
 std::vector<pthread_t> writersVector;
 std::vector<pthread_t> readersVector;
+
+std::queue<pthread_t> readersQueue;
 
 pthread_mutex_t mutex;
 pthread_cond_t turn;
@@ -66,11 +69,12 @@ void* readerThread(void* arg)
 
 	while(true)
 	{
+		readersQueue.push(pthread_self());
 		pthread_mutex_lock(&mutex);
-		while(isWriterPresent==true || readersCounter>=PLACES)
+		while(isWriterPresent==true || readersCounter>=PLACES || pthread_self()!=readersQueue.front())
 			pthread_cond_wait(&turn, &mutex);
 		readersCounter++;
-
+		readersQueue.pop();
 		lastInside=READER;
 
 		pthread_mutex_unlock(&mutex);
