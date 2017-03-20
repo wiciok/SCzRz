@@ -24,14 +24,14 @@ const int bufferCapacity=15;
 circular_buffer<int> buffer(bufferCapacity);
 
 
-void* producerCode(void* arg)
+void* producerThread(void* arg)
 {
 	std::random_device randomSeed;
 	std::mt19937 randomGenerator(randomSeed());
 	std::uniform_int_distribution<int> distribution(0,100);
 	int producedValue;
 
-	while(1)
+	while(true)
 	{
 		pthread_mutex_lock(&mutex);
 
@@ -54,7 +54,7 @@ void* producerCode(void* arg)
 	return 0;
 }
 
-void* consumerCode(void* arg)
+void* consumerThread(void* arg)
 {
 	std::random_device randomSeed;
 	std::mt19937 randomGenerator(randomSeed());
@@ -62,7 +62,7 @@ void* consumerCode(void* arg)
 
 	int product;
 
-	while(1)
+	while(true)
 	{
 		pthread_mutex_lock(&mutex);
 		while(buffer.empty()) //bufor pusty
@@ -103,12 +103,12 @@ int main(int argc, char *argv[])
 	pthread_t tmp;
 	for(size_t i=0;i<producersCount;i++)
 	{
-		pthread_create(&tmp, NULL, producerCode, NULL);
+		pthread_create(&tmp, NULL, producerThread, NULL);
 		producersVector.push_back(tmp);
 	}
 	for(size_t i=0;i<consumersCount;i++)
 	{
-		pthread_create(&tmp, NULL, consumerCode, NULL);
+		pthread_create(&tmp, NULL, consumerThread, NULL);
 		producersVector.push_back(tmp);
 	}
 
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 	//watki sie nigdy nie joinuja bo dzialaja w nieskonczonej petli - dlatego brak joinów
 	while(true)
 	{
-		cout<<"main thread...\n";
+		//cout<<"main thread...\n";
 		sleep(10);
 	}
 
