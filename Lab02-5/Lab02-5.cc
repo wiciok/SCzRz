@@ -19,6 +19,11 @@ size_t readersCounter;
 size_t writersCounter;
 
 bool isWriterPresent = false;
+enum Type
+{
+	NONE=0, WRITER=1,READER=2
+};
+Type lastInside=NONE;
 
 void* writerThread(void* arg)
 {
@@ -30,11 +35,13 @@ void* writerThread(void* arg)
 	{
 		pthread_mutex_lock(&mutex);
 		writersCounter++;
-		while(readersCounter>0 || isWriterPresent==true)
+		while(readersCounter>0 || isWriterPresent==true || lastInside==WRITER)
 		{
 			pthread_cond_wait(&turn, &mutex);
 		}
 		isWriterPresent=true;
+
+		lastInside=WRITER;
 
 		pthread_mutex_unlock(&mutex);
 
@@ -60,9 +67,12 @@ void* readerThread(void* arg)
 	while(true)
 	{
 		pthread_mutex_lock(&mutex);
-		readersCounter++;
-		while(isWriterPresent==true)
+		while(isWriterPresent==true || readersCounter>=PLACES)
 			pthread_cond_wait(&turn, &mutex);
+		readersCounter++;
+
+		lastInside=READER;
+
 		pthread_mutex_unlock(&mutex);
 
 		cout << "Reading... reader " << pthread_self() << endl;
