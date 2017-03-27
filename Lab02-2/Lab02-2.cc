@@ -16,13 +16,13 @@ struct ThreadData
    pthread_t TID;
 };
 
-ThreadData* threads;
+ThreadData* threadsVector;
 
 void *threadFunction(void* argv)
 {
 	int counter=0;
 	//dodac 1 do zg(?)
-	for(int i=threads[pthread_self() - 2].zd; i<threads[pthread_self() - 2].zg; i++)
+	for(int i=threadsVector[pthread_self() - 2].zd; i<threadsVector[pthread_self() - 2].zg; i++)
 	{
 		if (checkIfPrimary(i)==true)
 		{
@@ -55,31 +55,31 @@ int main(int argc, char *argv[])
 	int zdOfInterval = zd;
 	int zgOfInterval = zd+threadInterval;
 
-	threads = new ThreadData[threadsNumber];
+	threadsVector = new ThreadData[threadsNumber];
 
 	//compute bounds and create threads
 	for(int i=0; i<threadsNumber-1; i++)
 	{
-		threads[i].zd = zdOfInterval;
-		threads[i].zg = zgOfInterval;
+		threadsVector[i].zd = zdOfInterval;
+		threadsVector[i].zg = zgOfInterval;
 		zdOfInterval += threadInterval;
 
-		pthread_create(&(threads[i].TID), NULL, threadFunction, NULL);
+		pthread_create(&(threadsVector[i].TID), NULL, threadFunction, NULL);
 		zdOfInterval = zgOfInterval;
 		zgOfInterval += threadInterval;
 	}
 
 	//last interval
-	threads[threadsNumber-1].zd = zdOfInterval;
-	threads[threadsNumber-1].zg = zg;
-	pthread_create(&(threads[threadsNumber-1].TID), NULL, threadFunction, NULL);
+	threadsVector[threadsNumber-1].zd = zdOfInterval;
+	threadsVector[threadsNumber-1].zg = zg;
+	pthread_create(&(threadsVector[threadsNumber-1].TID), NULL, threadFunction, NULL);
 
 
 	for(int i=0; i<threadsNumber; i++)
 	{
 		void* primesNumber;
-		pthread_join(threads[i].TID, &primesNumber);
-		cout<<"Thread "<<threads[i].TID;
+		pthread_join(threadsVector[i].TID, &primesNumber);
+		cout<<"Thread "<<threadsVector[i].TID;
 		cout<<" Primes number: "<<(int)primesNumber<<endl;
 	}
 	cout<<"test";
